@@ -86,7 +86,7 @@ void matrizAdjunta(int n, float a[][3], float ma[][3], float d[]){
 						w++;
 					}
 					if(k < n && w < n){
-						d[z]=a[k][w];
+						d[z] = a [k][w];
 						z++;
 					}
 				}
@@ -97,7 +97,7 @@ void matrizAdjunta(int n, float a[][3], float ma[][3], float d[]){
 			for(int h = 0; h <= (j + i); h++){
 				mu = -mu;
 			}
-			ma[i][j] =mu * (((d[0]) * (d[3])) - ((d[1]) * (d[2])));
+			ma[i][j] = mu * (((d[0]) * (d[3])) - ((d[1]) * (d[2])));
 		}
 	}
 }
