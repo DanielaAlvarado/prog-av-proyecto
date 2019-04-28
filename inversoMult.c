@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 void inputMatriz(int, float[][3]);
 void matrizAdjunta(int, float[][3], float[][3], float[]);
 void imprimirMatriz(int, float[][3]);
@@ -10,206 +9,166 @@ float cofact(int, float, float[][3], float[]);
 void inversa(int, float, float[][3], float[][3]);
 void mult(int, float[][3], float[][3], float[][3]);
 
-int main()
-{
-	//La matriz sólo puede ser de 3x3.
-	int N=3;
-	float Determinante=0;
+int main(){
+	// La matriz solo puede ser de 3x3.
+	int n = 3;
+	float det = 0;
 
-	//Matriz original, adjunta, y matriz de determinante.
-	float A[N][N];
-	float Ma[N][N];
-	float Mt[N][N];
-	float D[4]={0,0,0,0};
-	float I[N][N];
-	float R[N][N];
+	// Matriz original, adjunta, y matriz de determinante.
+	float a[n][n];
+	float ma[n][n];
+	float mt[n][n];
+	float d[4] = {0, 0, 0, 0};
+	float in[n][n];
+	float r[n][n];
 
 
-	//Se igualan los valores de las casillas de las matrices a 0.
-	for(int j=0; j<N; j++)
-	{
-		for(int i=0; i<N; i++)
-		{
-				A[j][i]=0;
-				Ma[j][i]=0;
-				Mt[j][i]=0;
-				R[j][i]=0;
+	// Se igualan los valores de las casillas de las matrices a 0.
+	for(int j = 0; j < n; j++){
+		for(int i = 0; i < n; i++){
+			a[j][i]=0;
+			ma[j][i]=0;
+			mt[j][i]=0;
+			r[j][i]=0;
 		}
 	}
 
-	printf("\n\nEl número de columnas y filas de A es de 3x3: \n");
+	printf("\n\nEl numero de columnas y filas de A es de 3x3: \n");
 
-	inputMatriz(N, A);
-	matrizAdjunta(N, A, Ma, D);
-	matrizTranspuesta(N, Ma, Mt);
-	Determinante = cofact(N, Determinante, A, D);
-	inversa(N, Determinante, I, Mt);
-	mult(N, A, I, R);
+	inputMatriz(n, a);
+	matrizAdjunta(n, a, ma, d);
+	matrizTranspuesta(n, ma, mt);
+	det = cofact(n, det, a, d);
+	inversa(n, det, in, mt);
+	mult(n, a, in, r);
 
 	printf("La matriz A es: \n");
-	imprimirMatriz(N, A);
+	imprimirMatriz(n, a);
 
 	printf("La matriz adjunta de A es: \n");
-	imprimirMatriz(N, Ma);
+	imprimirMatriz(n, ma);
 
 	printf("La matriz transpuesta de la adjunta de A es: \n");
-	imprimirMatriz(N, Mt);
+	imprimirMatriz(n, mt);
 
-	printf("El determinante de A es: %f\n\n", Determinante);
+	printf("El determinante de A es: %f\n\n", det);
 
 	printf("La matriz inversa de A es: \n");
-	imprimirMatriz(N, I);
+	imprimirMatriz(n, in);
 
 	printf("La multiplicacion de la matriz inversa por A es: \n");
-	imprimirMatriz(N, R);
-
-	system("PAUSE");
-	return 0;
+	imprimirMatriz(n, r);
 }
 
 //Input de los valores de la matriz.
-void inputMatriz(int N, float A[][3])
-{
+void inputMatriz(int n, float a[][3]){
 	int j, i;
 	printf("\nEscribe el valor de cada una de las celdas de la matriz:\n");
-	for(j=0; j<N; j++)
-	{
-		for(i=0; i<N; i++)
-		{
+	for(j = 0; j < n; j++){
+		for(i = 0; i < n; i++){
 			printf("\nEscribe el valor la celda que esta en la columna %d y en la fila %d: ", i, j);
-			scanf("%f", &A[j][i]);
+			scanf("%f", &a[j][i]);
 		}
 	}
 }
 
-//Función que calcula la matriz adjunta
-void matrizAdjunta(int N, float A[][3], float Ma[][3], float D[])
-{
-	for(int i=0; i<N; i++)
-	{
-		for(int j=0; j<N; j++)
-		{
-			int z=0;
-			for(int k=0; k<N; k++)
-			{
-				if(k==i)
-				{
+//Funcion que calcula la matriz adjunta
+void matrizAdjunta(int n, float a[][3], float ma[][3], float d[]){
+	for(int i = 0; i < n; i++){
+		for(int j = 0; j < n; j++){
+			int z = 0;
+			for(int k = 0; k < n; k++){
+				if(k == i){
 					k++;
 				}
-				for(int w=0; w<N; w++)
-				{
-					if(w==j)
-					{
+				for(int w = 0; w < n; w++){
+					if(w == j){
 						w++;
 					}
-					if(k<N && w<N)
-					{
-						D[z]=A[k][w];
+					if(k < n && w < n){
+						d[z]=a[k][w];
 						z++;
 					}
 				}
 			}
 
 			//Se calcula el adjunto de cada casilla.
-			int mu=(-1);
-			for(int h=0; h<=(j+i); h++)
-			{
-				mu=mu*(-1);
+			int mu = (-1);
+			for(int h = 0; h <= (j + i); h++){
+				mu = -mu;
 			}
-			Ma[i][j]=mu*(((D[0])*(D[3]))-((D[1])*(D[2])));
+			ma[i][j] =mu * (((d[0]) * (d[3])) - ((d[1]) * (d[2])));
 		}
 	}
 }
 
-void imprimirMatriz(int N, float A[][3])
-{
-	for(int j=0; j<N; j++)
-	{
-		for(int i=0; i<N; i++)
-		{
-			printf("\t%f", A[j][i]);
+void imprimirMatriz(int n, float a[][3]){
+	for(int j = 0; j < n; j++){
+		for(int i = 0; i < n; i++){
+			printf("\t%f", a[j][i]);
 		}
 		printf("\n");
 	}
 	printf("\n");
 }
 
-void matrizTranspuesta(int N, float Ma[][3], float Mt[][3])
-{
-	for(int j=0; j<N; j++)
-	{
-		for(int i=0; i<N; i++)
-		{
-			Mt[j][i]=Ma[i][j];
+void matrizTranspuesta(int n, float ma[][3], float mt[][3]){
+	for(int j = 0; j < n; j++){
+		for(int i = 0; i < n; i++){
+			mt[j][i] = ma[i][j];
 		}
 	}
 }
 
-float cofact(int N, float Determinante, float A[][3],  float D[])
-{
-	float cofact[3]={0,0,0};
+float cofact(int n, float det, float a[][3],  float d[]){
+	float cofact[3] = {0, 0, 0};
 
-	int i=0;
-	for(int j=0; j<N; j++)
-	{
-		int z=0;
-		for(int k=0; k<N; k++)
-		{
-			if(k==i)
-			{
+	int i = 0;
+	for(int j = 0; j < n; j++){
+		int z = 0;
+		for(int k = 0; k < n; k++){
+			if(k == i){
 				k++;
 			}
-			for(int w=0; w<N; w++)
-			{
-				if(w==j)
-				{
+			for(int w = 0; w < n; w++){
+				if(w == j){
 					w++;
 				}
-				if(k<N && w<N)
-				{
-					D[z]=A[k][w];
+				if(k < n && w < n){
+					d[z] = a[k][w];
 					z++;
 				}
 			}
 		}
 
 		//Se calcula el adjunto de cada casilla.
-		int mu=(-1);
-		for(int h=0; h<=(j+i); h++)
-		{
-			mu=mu*(-1);
+		int mu = -1;
+		for(int h = 0; h <= j + i; h++){
+			mu = -mu;
 		}
-		cofact[j]=mu*(((D[0])*(D[3]))-((D[1])*(D[2])))*A[i][j];
+		cofact[j] = mu * (((d[0]) * (d[3])) - ((d[1]) * (d[2]))) * a[i][j];
 	}
 
-	for(int j=0; j<N; j++)
-	{
-		Determinante=cofact[j]+Determinante;
+	for(int j = 0; j < n; j++){
+		det = cofact[j] + det;
 	}
 
-	return Determinante;
+	return det;
 }
 
-void inversa(int N, float Determinante, float I[][3], float Mt[][3])
-{
-	for (int j=0; j<N; ++j)
-	{
-		for (int i=0; i<N; ++i)
-		{
-			I[j][i]=Mt[j][i]/Determinante;
+void inversa(int n, float det, float in[][3], float mt[][3]){
+	for(int j = 0; j < n; j++){
+		for (int i = 0; i < n; i++){
+			in[j][i] = mt[j][i] / det;
 		}
 	}
 }
 
-void mult(int N, float A[][3], float I[][3], float R[][3])
-{
-	for(int j=0; j<N; j++)
-	{
-		for(int i=0; i<N; i++)
-		{
-			for(int k=0; k<N; k++)
-			{
-				R[j][i] = A[j][k]*I[k][i]+R[j][i];
+void mult(int n, float a[][3], float in[][3], float r[][3]){
+	for(int j = 0; j < n; j++){
+		for(int i = 0; i < n; i++){
+			for(int k = 0; k < n; k++){
+				r[j][i] = a[j][k] * in[k][i] + r[j][i];
 			}
 		}
 	}
