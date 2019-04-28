@@ -165,8 +165,19 @@ void transpose(matrix_t *m_ptr) {
 	@return			Transposed matrix.
 */
 matrix_t *getTranspose(matrix_t *m_ptr) {
-	printf("Not implemented yet :(\n");
-	exit(-1);
+	int rows = m_ptr->rows;
+	int cols = m_ptr->cols;
+	
+	assert(rows == cols);
+	
+	matrix_t *t_ptr = newSquareMatrix(rows);
+	for(int i = 0; i < rows; i++) {
+		for(int j = 0; j < cols; j++) {
+			setValue(t_ptr, i, j, getValue(m_ptr, j, i));
+		}
+	}
+	
+	return t_ptr;
 }
 
 /**
