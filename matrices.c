@@ -16,13 +16,13 @@
 typedef struct {
 	int rows;
 	int cols;
-	int *values;
+	float *values;
 } matrix_t;
 
 //	Function declarations
-void setValue(matrix_t *, const int, const int, const int);
-int getValue(matrix_t *, const int, const int);
-int getDeterminant(matrix_t *);
+void setValue(matrix_t *, const int, const int, const float);
+float getValue(matrix_t *, const int, const int);
+float getDeterminant(matrix_t *);
 
 /**
 	New Matrix
@@ -41,7 +41,7 @@ matrix_t *newMatrix(const int rows, const int cols) {
 	m_ptr->cols = cols;
 	
 	//	Allocate space for matrix values and init
-	int *m_values = (int *)calloc(rows * cols, sizeof(int));
+	float *m_values = (float *)calloc(rows * cols, sizeof(float));
 	//	Link values space to matrix struct
 	m_ptr->values = m_values;
 	
@@ -67,10 +67,10 @@ matrix_t *import(const char *path) {
 	fscanf(f_ptr, "%d", &cols);
 	matrix_t *m_ptr = newMatrix(rows, cols);
 	
-	int element;
+	float element;
 	for(int i = 0; i < rows; i++) {
 		for(int j = 0; j < cols; j++){
-			if(fscanf(f_ptr, "%d", &element) != 1) {
+			if(fscanf(f_ptr, "%f", &element) != 1) {
 				printf("%s: File is damaged or not correctly formatted\n", path);
 				return NULL;
 			}
@@ -95,7 +95,7 @@ matrix_t *newDummyMatrix(const int rows, const int cols) {
 	matrix_t *m_ptr = newMatrix(rows, cols);
 	for(int i = 0; i < rows; i++) {
 		for(int j = 0; j < cols; j++) {
-			int element = (cols * i) + j + 1;
+			float element = (cols * i) + j + 1;
 			setValue(m_ptr, i, j, element);
 		}
 	}
@@ -149,7 +149,7 @@ void printMatrix(matrix_t *m_ptr) {
 	
 	for(int i = 0; i < rows; i++) {
 		for(int j = 0; j < cols; j++) {
-			printf("\t%d", getValue(m_ptr, i, j));
+			printf("\t%f", getValue(m_ptr, i, j));
 		}
 		printf("\n");
 	}
@@ -166,7 +166,7 @@ void printSerializedMatrix(matrix_t *m_ptr) {
 	int cols = m_ptr->cols;
 	
 	for(int i = 0; i < rows * cols; i++) {
-		printf("%d ", m_ptr->values[i]);
+		printf("%f ", m_ptr->values[i]);
 	}
 	
 	printf("\n");
@@ -180,7 +180,7 @@ void printSerializedMatrix(matrix_t *m_ptr) {
 	@param	col		Column in which the element's value will be set.
 	@param	value	Value to be set on the element.
 */
-void setValue(matrix_t *m_ptr, const int row, const int col, const int value) {
+void setValue(matrix_t *m_ptr, const int row, const int col, const float value) {
 	int rows = m_ptr->rows;
 	int cols = m_ptr->cols;
 	
@@ -198,7 +198,7 @@ void setValue(matrix_t *m_ptr, const int row, const int col, const int value) {
 	@param	col		Column in which the element is located.
 	@return			Value of the indicated element.
 */
-int getValue(matrix_t *m_ptr, const int row, const int col) {
+float getValue(matrix_t *m_ptr, const int row, const int col) {
 	int rows = m_ptr->rows;
 	int cols = m_ptr->cols;
 	
@@ -221,7 +221,7 @@ void transpose(matrix_t *m_ptr) {
 	
 	for(int i = 0; i < rows; i++) {
 		for(int j = 0; j < i; j++) {
-			int temp = getValue(m_ptr, i, j);
+			float temp = getValue(m_ptr, i, j);
 			//	Swap
 			setValue(m_ptr, i, j, getValue(m_ptr, j, i));
 			setValue(m_ptr, j, i, temp);
@@ -299,14 +299,14 @@ matrix_t *getMinor(matrix_t *m_ptr, const int e_row, const int e_col) {
 	@param	col		Column of the designated element.
 	@return			Cofactor of the designated element.
 */
-int getCofactor(matrix_t *m_ptr, const int row, const int col) {
+float getCofactor(matrix_t *m_ptr, const int row, const int col) {
 	int rows = m_ptr->rows;
 	int cols = m_ptr->cols;
 	
 	assert(rows == cols);
 	
 	matrix_t *minor = getMinor(m_ptr, row, col);
-	int cofactor = (int)pow(-1, row + col) * getDeterminant(minor);
+	float cofactor = (float)pow(-1, row + col) * getDeterminant(minor);
 	destroyMatrix(minor);
 	return cofactor;
 }
@@ -362,11 +362,11 @@ matrix_t *getInverseMatrix(matrix_t *m_ptr) {
 	
 	matrix_t *inverse = newSquareMatrix(rows);
 	matrix_t *adjugate = getAdjugateMatrix(m_ptr);
-	int determinant = getDeterminant(m_ptr);
+	float determinant = getDeterminant(m_ptr);
 	
 	for(int i = 0; i < rows; i++) {
 		for(int j = 0; j < cols; j++) {
-			int element = getValue(adjugate, i, j) / determinant;
+			float element = getValue(adjugate, i, j) / determinant;
 			setValue(inverse, i, j, element);
 		}
 	}
@@ -381,7 +381,7 @@ matrix_t *getInverseMatrix(matrix_t *m_ptr) {
 	@param	m_ptr	Pointer to the matrix to get the determinant of.
 	@return			Determinant of the given matrix.
 */
-int getDeterminant(matrix_t *m_ptr) {
+float getDeterminant(matrix_t *m_ptr) {
 	int rows = m_ptr->rows;
 	int cols = m_ptr->cols;
 	
@@ -390,7 +390,7 @@ int getDeterminant(matrix_t *m_ptr) {
 	if(rows == 1)
 		return getValue(m_ptr, 0, 0);
 	
-	int determinant = 0;
+	float determinant = 0;
 	for(int j = 0; j < cols; j++) {
 		//	Compute determinant from first row elements
 		determinant += getValue(m_ptr, 0, j) * getCofactor(m_ptr, 0, j);
