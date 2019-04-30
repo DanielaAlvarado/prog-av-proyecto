@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
+#include <omp.h>
 
 /**
 	Matrix
@@ -219,6 +220,8 @@ void transpose(matrix_t *m_ptr) {
 	
 	assert(rows == cols);
 	
+	//	These operations are too lightweight for parallel computing
+//	#pragma omp parallel for collapse(2)
 	for(int i = 0; i < rows; i++) {
 		for(int j = 0; j < i; j++) {
 			float temp = getValue(m_ptr, i, j);
@@ -325,6 +328,7 @@ matrix_t *getCofactorMatrix(matrix_t *m_ptr) {
 	assert(rows == cols);
 	
 	matrix_t *comatrix = newSquareMatrix(rows);
+	#pragma omp parallel for collapse(2)
 	for(int i = 0; i < rows; i++) {
 		for(int j = 0; j < cols; j++) {
 			setValue(comatrix, i, j, getCofactor(m_ptr, i, j));
@@ -364,6 +368,7 @@ matrix_t *getInverseMatrix(matrix_t *m_ptr) {
 	matrix_t *adjugate = getAdjugateMatrix(m_ptr);
 	float determinant = getDeterminant(m_ptr);
 	
+	#pragma omp parallel for collapse(2)
 	for(int i = 0; i < rows; i++) {
 		for(int j = 0; j < cols; j++) {
 			float element = getValue(adjugate, i, j) / determinant;
@@ -403,31 +408,15 @@ float getDeterminant(matrix_t *m_ptr) {
 	Some testing and debugging...
 */
 int main(int argc, char *argv[]) {
-//	matrix_t *a_ptr = newMatrix(3, 4);
-//	setValue(a_ptr, 1, 2, 5);
-//	printMatrix(a_ptr);
-//	printf("%d\n", getValue(a_ptr, 1, 2));
-//	destroyMatrix(a_ptr);
+	double start_time;
+	double end_time;
+	double running_time;
 	
-//	matrix_t *b_ptr = newIdentity(4);
-//	printMatrix(b_ptr);
-//	destroyMatrix(b_ptr);
-	
-//	matrix_t *c_ptr = newDummyMatrix(4, 4);
-	
-//	printMatrix(c_ptr);
-//	printSerializedMatrix(c_ptr);
-//	transpose(c_ptr);
-//	printMatrix(c_ptr);
-	
-	matrix_t *d_ptr = import("matrix.mat");
+	matrix_t *d_ptr = import("long.mat");
+	start_time = omp_get_wtime();
 	matrix_t *inverse = getInverseMatrix(d_ptr);
+	end_time = omp_get_wtime();
+	running_time = end_time - start_time;
 	printMatrix(inverse);
-	
-//	matrix_t *e_ptr = newSquareMatrix(3);
-//	setValue(e_ptr, 0, 2, 5);
-//	setValue(e_ptr, 1, 1, 3);
-//	setValue(e_ptr, 2, 0, 2);
-//	printMatrix(e_ptr);
-//	printSerializedMatrix(e_ptr);
+	printf("t.%f s\n", running_time);
 }
