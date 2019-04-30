@@ -271,11 +271,12 @@ matrix_t *getMinor(matrix_t *m_ptr, const int e_row, const int e_col) {
 	matrix_t *minor_ptr = newMatrix(m_rows - 1, m_cols - 1);
 	
 	int min_row = 0;
+	int min_col;
 	for(int i = 0; i < m_rows; i++) {
 		if(i == e_row)
 			continue;
 		
-		int min_col = 0;
+		min_col = 0;
 		for(int j = 0; j < m_cols; j++) {
 			if(j == e_col)
 				continue;
@@ -308,6 +309,70 @@ int getCofactor(matrix_t *m_ptr, const int row, const int col) {
 	int cofactor = (int)pow(-1, row + col) * getDeterminant(minor);
 	destroyMatrix(minor);
 	return cofactor;
+}
+
+/**
+	Get Cofactor Matrix
+	Computes the cofactor matrix of given matrix.
+	@param	m_ptr	Matrix to get the cofactor matrix of.
+	@return			The cofactor matrix.
+*/
+matrix_t *getCofactorMatrix(matrix_t *m_ptr) {
+	int rows = m_ptr->rows;
+	int cols = m_ptr->cols;
+	
+	//	Check a square matrix was given
+	assert(rows == cols);
+	
+	matrix_t *comatrix = newSquareMatrix(rows);
+	for(int i = 0; i < rows; i++) {
+		for(int j = 0; j < cols; j++) {
+			setValue(comatrix, i, j, getCofactor(m_ptr, i, j));
+		}
+	}
+	
+	return comatrix;
+}
+
+/**
+	Get Adjugate Matrix
+	Computes the adjugate of given matrix.
+	@param	m_ptr	The matrix to get the adjugate of.
+	@return			The adjugate matrix.
+*/
+matrix_t *getAdjugateMatrix(matrix_t *m_ptr) {
+	matrix_t *adjugate = getCofactorMatrix(m_ptr);
+	transpose(adjugate);
+	
+	return adjugate;
+}
+
+/**
+	Get Inverse Matrix
+	Computes the inverse of the given matrix.
+	@param	m_ptr	Pointer to the matrix to get the inverse of.
+	@return			The inverse of the given matrix.
+*/
+matrix_t *getInverseMatrix(matrix_t *m_ptr) {
+	int rows = m_ptr->rows;
+	int cols = m_ptr->cols;
+	
+	//	Check a square matrix was given
+	assert(rows == cols);
+	
+	matrix_t *inverse = newSquareMatrix(rows);
+	matrix_t *adjugate = getAdjugateMatrix(m_ptr);
+	int determinant = getDeterminant(m_ptr);
+	
+	for(int i = 0; i < rows; i++) {
+		for(int j = 0; j < cols; j++) {
+			int element = getValue(adjugate, i, j) / determinant;
+			setValue(inverse, i, j, element);
+		}
+	}
+	
+	destroyMatrix(adjugate);
+	return inverse;
 }
 
 /**
@@ -356,8 +421,8 @@ int main(int argc, char *argv[]) {
 //	printMatrix(c_ptr);
 	
 	matrix_t *d_ptr = import("matrix.mat");
-	printMatrix(d_ptr);
-	printf("Det: %d\n", getDeterminant(d_ptr));
+	matrix_t *inverse = getInverseMatrix(d_ptr);
+	printMatrix(inverse);
 	
 //	matrix_t *e_ptr = newSquareMatrix(3);
 //	setValue(e_ptr, 0, 2, 5);
