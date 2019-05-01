@@ -3,49 +3,39 @@
 #include <math.h>
 #include <assert.h>
 #include <omp.h>
+#include <matrices.h>
 
 /**
 	Matrix
-	
+
 	Some convenient functions for handling matrices as a type.
-	
+
 	@author		A01329233	Daniela Alvarado Pereda
 	@author		A01328937	Luis Francisco Flores Romero
 	@since		29.apr.19
 */
-
-typedef struct {
-	int rows;
-	int cols;
-	float *values;
-} matrix_t;
-
-//	Function declarations
-void setValue(matrix_t *, const int, const int, const float);
-float getValue(matrix_t *, const int, const int);
-float getDeterminant(matrix_t *);
 
 /**
 	New Matrix
 	Allocates space for a matrix and its values.
 	@param	rows	Rows in the matrix.
 	@param	cols	Columns in the matrix.
-	@return			Pointer to the new matrix.	
+	@return			Pointer to the new matrix.
 */
 matrix_t *newMatrix(const int rows, const int cols) {
 	assert(rows > 0);
 	assert(cols > 0);
-	
+
 	//	Allocate space for matrix struct and init
 	matrix_t *m_ptr = (matrix_t *)malloc(sizeof(matrix_t));
 	m_ptr->rows = rows;
 	m_ptr->cols = cols;
-	
+
 	//	Allocate space for matrix values and init
 	float *m_values = (float *)calloc(rows * cols, sizeof(float));
 	//	Link values space to matrix struct
 	m_ptr->values = m_values;
-	
+
 	return m_ptr;
 }
 
@@ -61,13 +51,13 @@ matrix_t *import(const char *path) {
 	if(f_ptr == NULL) {
 		printf("Couldn't open file: %s\n", path);
 	}
-	
+
 	int rows;
 	int cols;
 	fscanf(f_ptr, "%d", &rows);
 	fscanf(f_ptr, "%d", &cols);
 	matrix_t *m_ptr = newMatrix(rows, cols);
-	
+
 	float element;
 	for(int i = 0; i < rows; i++) {
 		for(int j = 0; j < cols; j++){
@@ -78,7 +68,7 @@ matrix_t *import(const char *path) {
 			setValue(m_ptr, i, j, element);
 		}
 	}
-	
+
 	fclose(f_ptr);
 	return m_ptr;
 }
@@ -100,7 +90,7 @@ matrix_t *newDummyMatrix(const int rows, const int cols) {
 			setValue(m_ptr, i, j, element);
 		}
 	}
-	
+
 	return m_ptr;
 }
 
@@ -125,7 +115,7 @@ matrix_t *newIdentity(const int n) {
 	for(int i = 0; i < n; i++) {
 		setValue(m_ptr, i, i, 1);
 	}
-	
+
 	return m_ptr;
 }
 
@@ -147,7 +137,7 @@ void destroyMatrix(matrix_t *m_ptr) {
 void printMatrix(matrix_t *m_ptr) {
 	int rows = m_ptr->rows;
 	int cols = m_ptr->cols;
-	
+
 	for(int i = 0; i < rows; i++) {
 		for(int j = 0; j < cols; j++) {
 			printf("\t%f", getValue(m_ptr, i, j));
@@ -165,11 +155,11 @@ void printMatrix(matrix_t *m_ptr) {
 void printSerializedMatrix(matrix_t *m_ptr) {
 	int rows = m_ptr->rows;
 	int cols = m_ptr->cols;
-	
+
 	for(int i = 0; i < rows * cols; i++) {
 		printf("%f ", m_ptr->values[i]);
 	}
-	
+
 	printf("\n");
 }
 
@@ -184,10 +174,10 @@ void printSerializedMatrix(matrix_t *m_ptr) {
 void setValue(matrix_t *m_ptr, const int row, const int col, const float value) {
 	int rows = m_ptr->rows;
 	int cols = m_ptr->cols;
-	
+
 	assert(row < rows);
 	assert(col < cols);
-	
+
 	m_ptr->values[(row * cols) + col] = value;
 }
 
@@ -202,10 +192,10 @@ void setValue(matrix_t *m_ptr, const int row, const int col, const float value) 
 float getValue(matrix_t *m_ptr, const int row, const int col) {
 	int rows = m_ptr->rows;
 	int cols = m_ptr->cols;
-	
+
 	assert(row < rows);
 	assert(col < cols);
-	
+
 	return m_ptr->values[row * cols + col];
 }
 
@@ -217,9 +207,9 @@ float getValue(matrix_t *m_ptr, const int row, const int col) {
 void transpose(matrix_t *m_ptr) {
 	int rows = m_ptr->rows;
 	int cols = m_ptr->cols;
-	
+
 	assert(rows == cols);
-	
+
 	//	These operations are too lightweight for parallel computing
 //	#pragma omp parallel for collapse(2)
 	for(int i = 0; i < rows; i++) {
@@ -241,16 +231,16 @@ void transpose(matrix_t *m_ptr) {
 matrix_t *getTranspose(matrix_t *m_ptr) {
 	int rows = m_ptr->rows;
 	int cols = m_ptr->cols;
-	
+
 	assert(rows == cols);
-	
+
 	matrix_t *t_ptr = newSquareMatrix(rows);
 	for(int i = 0; i < rows; i++) {
 		for(int j = 0; j < cols; j++) {
 			setValue(t_ptr, i, j, getValue(m_ptr, j, i));
 		}
 	}
-	
+
 	return t_ptr;
 }
 
@@ -265,32 +255,32 @@ matrix_t *getTranspose(matrix_t *m_ptr) {
 matrix_t *getMinor(matrix_t *m_ptr, const int e_row, const int e_col) {
 	int m_rows = m_ptr->rows;
 	int m_cols = m_ptr->cols;
-	
+
 	assert(e_row >= 0);
 	assert(e_row < m_rows);
 	assert(e_col >= 0);
 	assert(e_col < m_cols);
-	
+
 	matrix_t *minor_ptr = newMatrix(m_rows - 1, m_cols - 1);
-	
+
 	int min_row = 0;
 	int min_col;
 	for(int i = 0; i < m_rows; i++) {
 		if(i == e_row)
 			continue;
-		
+
 		min_col = 0;
 		for(int j = 0; j < m_cols; j++) {
 			if(j == e_col)
 				continue;
-			
+
 			setValue(minor_ptr, min_row, min_col, getValue(m_ptr, i, j));
 			min_col++;
 		}
-		
+
 		min_row++;
 	}
-	
+
 	return minor_ptr;
 }
 
@@ -305,9 +295,9 @@ matrix_t *getMinor(matrix_t *m_ptr, const int e_row, const int e_col) {
 float getCofactor(matrix_t *m_ptr, const int row, const int col) {
 	int rows = m_ptr->rows;
 	int cols = m_ptr->cols;
-	
+
 	assert(rows == cols);
-	
+
 	matrix_t *minor = getMinor(m_ptr, row, col);
 	float cofactor = (float)pow(-1, row + col) * getDeterminant(minor);
 	destroyMatrix(minor);
@@ -323,10 +313,10 @@ float getCofactor(matrix_t *m_ptr, const int row, const int col) {
 matrix_t *getCofactorMatrix(matrix_t *m_ptr) {
 	int rows = m_ptr->rows;
 	int cols = m_ptr->cols;
-	
+
 	//	Check a square matrix was given
 	assert(rows == cols);
-	
+
 	matrix_t *comatrix = newSquareMatrix(rows);
 	#pragma omp parallel for collapse(2)
 	for(int i = 0; i < rows; i++) {
@@ -334,7 +324,7 @@ matrix_t *getCofactorMatrix(matrix_t *m_ptr) {
 			setValue(comatrix, i, j, getCofactor(m_ptr, i, j));
 		}
 	}
-	
+
 	return comatrix;
 }
 
@@ -347,7 +337,7 @@ matrix_t *getCofactorMatrix(matrix_t *m_ptr) {
 matrix_t *getAdjugateMatrix(matrix_t *m_ptr) {
 	matrix_t *adjugate = getCofactorMatrix(m_ptr);
 	transpose(adjugate);
-	
+
 	return adjugate;
 }
 
@@ -360,14 +350,14 @@ matrix_t *getAdjugateMatrix(matrix_t *m_ptr) {
 matrix_t *getInverseMatrix(matrix_t *m_ptr) {
 	int rows = m_ptr->rows;
 	int cols = m_ptr->cols;
-	
+
 	//	Check a square matrix was given
 	assert(rows == cols);
-	
+
 	matrix_t *inverse = newSquareMatrix(rows);
 	matrix_t *adjugate = getAdjugateMatrix(m_ptr);
 	float determinant = getDeterminant(m_ptr);
-	
+
 	#pragma omp parallel for collapse(2)
 	for(int i = 0; i < rows; i++) {
 		for(int j = 0; j < cols; j++) {
@@ -375,7 +365,7 @@ matrix_t *getInverseMatrix(matrix_t *m_ptr) {
 			setValue(inverse, i, j, element);
 		}
 	}
-	
+
 	destroyMatrix(adjugate);
 	return inverse;
 }
@@ -389,34 +379,34 @@ matrix_t *getInverseMatrix(matrix_t *m_ptr) {
 float getDeterminant(matrix_t *m_ptr) {
 	int rows = m_ptr->rows;
 	int cols = m_ptr->cols;
-	
+
 	assert(rows == cols);
-	
+
 	if(rows == 1)
 		return getValue(m_ptr, 0, 0);
-	
+
 	float determinant = 0;
 	for(int j = 0; j < cols; j++) {
 		//	Compute determinant from first row elements
 		determinant += getValue(m_ptr, 0, j) * getCofactor(m_ptr, 0, j);
 	}
-	
+
 	return determinant;
 }
 
 /**
 	Some testing and debugging...
 */
-int main(int argc, char *argv[]) {
-	double start_time;
-	double end_time;
-	double running_time;
-	
-	matrix_t *d_ptr = import("long.mat");
-	start_time = omp_get_wtime();
-	matrix_t *inverse = getInverseMatrix(d_ptr);
-	end_time = omp_get_wtime();
-	running_time = end_time - start_time;
-	printMatrix(inverse);
-	printf("t.%f s\n", running_time);
-}
+// int main(int argc, char *argv[]) {
+// 	double start_time;
+// 	double end_time;
+// 	double running_time;
+//
+// 	matrix_t *d_ptr = import("matrix.mat");
+// 	start_time = omp_get_wtime();
+// 	matrix_t *inverse = getInverseMatrix(d_ptr);
+// 	end_time = omp_get_wtime();
+// 	running_time = end_time - start_time;
+// 	printMatrix(inverse);
+// 	printf("t.%f s\n", running_time);
+// }
